@@ -26,7 +26,7 @@ $(NAME): $(OBJS)
 	@echo -e "flags  : $(YLW)$(CXXFLAGS)$(NC)\nbuild  : $(GRN)$^$(NC)\n=> $(BLU)$@$(NC)" 
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
-	@mkdir -p $(OBJDIR)/$(*D)
+	@mkdir -p $(@D)
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 	@echo -e "compile: $(MGN)$<$(NC)\
 	$$(yes ' ' | head -n $$(expr $(ALIGN) - $$((`echo $< | wc -m` - 1))) | tr -d '\n') -> \
