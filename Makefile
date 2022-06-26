@@ -8,8 +8,8 @@ INCLUDES = ./includes
 SRCDIR = srcs
 OBJDIR = objs
 SRCS = $(shell find $(SRCDIR) -name "*.cpp" -type f)
-OBJS = $(patsubst $(SRCDIR)%,$(OBJDIR)%,$(SRCS:.cpp=.o))
-DEPS = $(patsubst $(SRCDIR)%,$(OBJDIR)%,$(SRCS:.cpp=.d))
+OBJS = $(SRCFILE:$(SRCDIR)%.cpp=$(OBJDIR)%.o)
+DEPS = $(SRCFILE:$(SRCDIR)%.cpp=$(OBJDIR)%.d)
 
 # === path of googletest dir === #
 GTESTDIR := googletest
