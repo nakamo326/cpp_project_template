@@ -2,9 +2,9 @@ NAME := tester
 
 SHELL := /bin/bash
 CXX := clang++
-CXXFLAGS = -std=c++11 -MMD -MP -DDEBUG -g -fsanitize=undefined -fsanitize=address
+CXXFLAGS = -std=c++11 -MMD -MP -DDEBUG -g -fsanitize=undefined -fsanitize=address -ftrivial-auto-var-init=pattern -Wtautological-compare -Wsign-compare -gfull -fstandalone-debug -gdwarf-5 -gz
 LIBS := -lpthread -lgtest_main -lgtest
-INCLUDES := -I./includes -I../includes
+INCLUDES := -I./includes -I../srcs
 LIBINCLUDES = -L./$(LIBDIR)
 
 ifeq ($(shell uname), Linux)
@@ -14,17 +14,17 @@ endif
 LIBDIR := lib
 SRCDIR := ../srcs
 OBJDIR := objs
-MAIN_FILE := main.cpp
+MAIN_FILE := webserv.cpp
 SRCFILE := $(filter-out %$(MAIN_FILE),$(shell find $(SRCDIR) -name "*.cpp" -type f))
-OBJS = $(patsubst $(SRCDIR)%,$(OBJDIR)%,$(SRCFILE:.cpp=.o))
-DEPS = $(patsubst $(SRCDIR)%,$(OBJDIR)%,$(SRCFILE:.cpp=.d))
+OBJS = $(SRCFILE:$(SRCDIR)%.cpp=$(OBJDIR)%.o)
+DEPS = $(SRCFILE:$(SRCDIR)%.cpp=$(OBJDIR)%.d)
 
 # ==== Path to test ==== #
 TESTDIR := tests
 TOBJDIR := tobjs
 TESTS := $(shell find $(TESTDIR) -name "*.cpp" -type f)
-TOBJS = $(patsubst $(TESTDIR)%,$(TOBJDIR)%,$(TESTS:.cpp=.o))
-TDEPS = $(patsubst $(TESTDIR)%,$(TOBJDIR)%,$(TESTS:.cpp=.d))
+TOBJS = $(TESTS:$(TESTDIR)%.cpp=$(TOBJDIR)%.o)
+TDEPS = $(TESTS:$(TESTDIR)%.cpp=$(TOBJDIR)%.d)
 
 all: $(NAME)
 -include $(DEPS) $(TDEPS)
@@ -37,11 +37,11 @@ run: $(NAME)
 	$(RM) $(NAME)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
-	@mkdir -p $(OBJDIR)/$(*D)
+	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c $< $(INCLUDES) -o $@
 
 $(TOBJDIR)/%.o: $(TESTDIR)/%.cpp
-	@mkdir -p $(TOBJDIR)/$(*D)
+	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c $< $(INCLUDES) -o $@
 
 $(LIBDIR):
@@ -64,8 +64,9 @@ cov: re
 	open cov_test/index-sort-f.html
 
 clean:
-	$(RM) $(TOBJS) $(TOBJDIR)/*.gcda $(TOBJDIR)/*.gcno
-	$(RM) -r $(TOBJDIR)
+	$(RM) $(OBJS)  $(DEPS) $(OBJDIR)/*.gcda $(OBJDIR)/*.gcno
+	$(RM) $(TOBJS)  $(TDEPS) $(TOBJDIR)/*.gcda $(TOBJDIR)/*.gcno
+	$(RM) -r $(TOBJDIR) $(OBJDIR)
 	$(RM) -r cov_test
 
 fclean: clean
